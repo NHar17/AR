@@ -1,0 +1,203 @@
+#define _CRT_SECURE_NO_WARNINGS 1
+#include <stdio.h>
+#include  <windows.h>
+#include <conio.h>
+#include <stdlib.h>
+
+#define w 40
+#define h 20
+int start;
+int tail=6;//蛇长度
+int  x;//蛇头
+int  y;
+char gr[h][w];
+int bx[100];//身体坐标
+int by[100];
+int score;
+int time=1000;
+int game = 0;
+int fx;
+int fy;
+enum d{ stop = 0,up,down,left,right };
+enum d dd;
+
+void set()
+{
+	x = w / 2;
+	y = h / 2;
+	for (int k = 0; k < tail; k++)
+	{
+		bx[k] = x - k - 1;
+		by[k] = y;
+	}
+	fx = rand() % (w-2) + 1;
+	fy = rand() % (h - 2) + 1;
+}
+
+void draw()
+{
+	system("cls");
+	int i = 0;//竖
+	int j = 0;//横
+	for (j = 1; j <=2+w; j++)
+	{
+		printf("-");
+	}
+	printf("\n");
+	for (i = 0; i < h; i++)
+	{
+		printf("|");
+		for (j = 0; j < w; j++)
+		{
+			if (j == x && i == y)
+			{
+				gr[i][j] = 'O';
+				printf("%c", gr[i][j]);
+			}
+			else if (i == fy && j == fx)
+			{
+				gr[i][j] = 'F';
+				printf("%c", gr[i][j]);
+			}
+			else
+			{
+				int v = 0;
+				for (int k = 0; k < tail; k++)
+				{
+					if (i == by[k] && j == bx[k])
+					{
+						gr[i][j] = 'o';
+						printf("%c", gr[i][j]);
+						v = 1;
+					}
+				}
+				if (!v)
+				{
+					gr[i][j] = ' ';
+					printf("%c", gr[i][j]);
+				}
+			}
+		}
+		printf("|");
+		printf("\n");
+	}
+	for (j = 1; j <= 2 + w; j++)
+	{
+		printf("-");
+	}
+	printf("\n score=%d", score);
+}
+
+void input()//方向键的前期录入
+{
+	char c;
+	if (_kbhit())
+	{
+		switch (_getch())
+		{
+		case'w':
+			dd = 1;
+			start = 1;
+			if (_kbhit() && _getch() == 'w')time = 150;
+			else time = 1000;
+			break;
+		case's':
+			dd = 2;
+			start = 1;
+			if (_kbhit() && _getch() == 's')time = 150;
+			else time = 1000;
+			break;
+		case'a':
+			dd = 3;
+			start = 1;
+			if (_kbhit() && _getch() == 'a')time = 150;
+			else time = 1000;
+			break;
+		case'd':
+			dd = 4;
+			start = 1;
+			if (_kbhit() && _getch() == 'd')time = 150;
+			else time = 1000;
+			break;
+		case'g':
+			game = 1;
+			start = 1;
+			break;
+		}
+	}
+}
+
+void output()
+{
+	int k = 0;
+	if (start)
+	{
+		int vx = bx[0];
+		int vy = by[0];
+		bx[0] = x;
+		by[0] = y;
+		int vx1, vy1;
+		for (k = 1; k < tail; k++)
+		{
+			vx1 = bx[k];
+			vy1 = by[k];
+			bx[k] = vx;
+			by[k] = vy;
+			vx = vx1;
+			vy = vy1;
+		}
+	}
+	
+	switch (dd)
+	{
+	case up:
+		y--;
+		break;
+	case down:
+		y++;
+		break;
+	case left:
+		x--;
+		break;
+	case right:
+		x++;
+		break;
+	}
+	if (x == fx && y == fy)//水果触碰
+	{
+		tail++;
+		fx = rand() % (w - 2) + 1;
+		fy = rand() % (h - 2) + 1;
+		score += 10;
+		
+	}
+	for (k = 0; k < tail; k++)
+	{
+		if (bx[k]==x && by[k]==y)
+		{
+			printf("\n触碰到身体,游戏结束");
+			game = 1;
+			break;
+		}
+	}
+	if (x<0 || x>w || y<0 || y>h)
+	{
+		game = 1;
+		printf("\n出界，游戏结束");
+	}
+}
+
+int main()
+{
+	
+	set();
+	do
+	{
+		draw();
+		input();
+		output();
+		Sleep(100);
+	} while (!game);
+
+	return 0;
+}
